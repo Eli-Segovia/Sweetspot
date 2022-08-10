@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Sweetspot RESTful API",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "NODE_ENV=production node server",
     "dev": "nodemon server"
