@@ -1,14 +1,20 @@
 import express, { Router } from 'express';
 const router = express.Router();
-import { getStores, getStore } from '../controllers/stores.js';
+import {
+    getStores,
+    getStore,
+    createStore,
+    deleteStore,
+    updateStore
+} from '../controllers/stores.js';
 
-// GET Stores
-// POST store
-// PUT store
-// DELETE store
-router.get('/', getStores);
+// GET      Stores
+// POST     Store
+router.route('/').get(getStores).post(createStore);
 
-// GET Store
-router.get('/:id', getStore);
+// GET      Store
+// PUT      Store
+// DELETE   Store
+router.route('/:id').get(getStore).put(updateStore).delete(deleteStore);
 
 export default router;
