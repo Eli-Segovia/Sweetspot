@@ -1,9 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-
-// Routes
-import stores from './routes/stores.js';
+import routerMounter from './utils/routerMounter.js';
 
 // Load env variables
 dotenv.config({ path: './config/config.env' });
@@ -17,7 +15,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Mount Routers
-app.use('/api/v1/stores', stores);
+routerMounter(app);
 
 const PORT = process.env.PORT || 5000;
 
