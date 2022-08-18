@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import morgan from 'morgan';
 
 // Routes
 import stores from './routes/stores.js';
@@ -9,6 +10,11 @@ dotenv.config({ path: './config/config.env' });
 
 // Init app
 const app = express();
+
+// Dev logging middleware
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
 
 // Mount Routers
 app.use('/api/v1/stores', stores);
