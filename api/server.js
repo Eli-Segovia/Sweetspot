@@ -2,9 +2,13 @@ import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import routerMounter from './utils/routerMounter.js';
+import connectDB from './config/db.js';
 
 // Load env variables
 dotenv.config({ path: './config/config.env' });
+
+// Connect to Mongo
+connectDB();
 
 // Init app
 const app = express();
