@@ -5,7 +5,8 @@ import {
     getStore,
     createStore,
     deleteStore,
-    updateStore
+    updateStore,
+    updateImageStore
 } from '../controllers/stores.js';
 
 // GET      Stores
@@ -16,5 +17,7 @@ router.route('/').get(getStores).post(createStore);
 // PUT      Store
 // DELETE   Store
 router.route('/:id').get(getStore).put(updateStore).delete(deleteStore);
+
+router.route('/uploads/:id').put(updateImageStore);
 
 export default router;
