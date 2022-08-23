@@ -1,4 +1,5 @@
 import multer from 'multer';
+import Store from '../models/Store.js';
 
 // init multer for fup
 const multerStorage = multer.memoryStorage();

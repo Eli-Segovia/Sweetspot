@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { imageSchema, locationSchema } from './embedded';
-const Schema = mongoose.Schema;
+import { imageSchema, locationSchema } from './embedded/index.js';
+const { Schema, model } = mongoose;
 
 const StoreSchema = new Schema({
     name: {
@@ -26,9 +26,17 @@ const StoreSchema = new Schema({
 
     url: String,
 
-    emails: [String],
+    emails: [
+        {
+            type: String,
+            required: [true, 'Please provide email']
+        }
+    ],
 
-    image: imageSchema,
+    image: {
+        type: imageSchema,
+        required: false
+    },
 
     description: {
         type: String,
@@ -36,7 +44,10 @@ const StoreSchema = new Schema({
         maxlength: [500, 'Description cannot be longer than 500 characters']
     },
 
-    alternateAddress: String,
+    alternateAddress: {
+        type: String,
+        required: false
+    },
 
     location: {
         type: locationSchema,
@@ -46,14 +57,16 @@ const StoreSchema = new Schema({
     products: [
         {
             type: Schema.Types.ObjectId,
-            refs: 'Product'
+            refs: 'Product',
+            required: false
         }
     ],
     averageRating: {
         type: Number,
         min: [1, 'Rating must be at least 1'],
-        max: [10, 'Rating must be no more than 10']
+        max: [10, 'Rating must be no more than 10'],
+        required: false
     }
 });
 
-export default StoreSchema;
+export default model('Store', StoreSchema);
