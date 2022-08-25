@@ -1,5 +1,10 @@
-import express, { Router } from 'express';
-const router = express.Router();
+import { Router } from 'express';
+import multer from 'multer';
+
+const multerStorage = multer.memoryStorage();
+const upload = multer({ storage: multerStorage });
+
+const router = Router();
 import {
     getStores,
     getStore,
@@ -18,6 +23,7 @@ router.route('/').get(getStores).post(createStore);
 // DELETE   Store
 router.route('/:id').get(getStore).put(updateStore).delete(deleteStore);
 
-router.route('/uploads/:id').put(updateImageStore);
+// PUT      Store -> image
+router.put('/uploads/:id', upload.single('image'), updateImageStore);
 
 export default router;

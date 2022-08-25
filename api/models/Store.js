@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { imageSchema, locationSchema } from './embedded/index.js';
+
 const { Schema, model } = mongoose;
 
 const StoreSchema = new Schema({
@@ -11,13 +12,26 @@ const StoreSchema = new Schema({
     },
 
     owner: {
+        /* Below should be used for prod
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        required: [true, 'Stores need an owner to be created'],
+        ref: 'User' 
+        */
+
+        /* Below is used for testing purposes for creating a Store */
+        type: String,
+        required: [true, 'Stores need an owner to be created'],
+        immutable: true
     },
 
     admins: [
         {
+            /* Uncomment during prod
             type: Schema.Types.ObjectId,
+            */
+            /* use for testing */
+            type: String,
+            required: [true, 'You are trying to do something invalid'],
             ref: 'User'
         }
     ],
@@ -35,7 +49,7 @@ const StoreSchema = new Schema({
 
     image: {
         type: imageSchema,
-        required: false
+        default: () => ({})
     },
 
     description: {
