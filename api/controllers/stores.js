@@ -1,7 +1,12 @@
 import Store from '../models/Store.js';
+import HTTPError, { HTTPErrorBuilder } from '../utils/HTTPError.js';
 import { Image } from '../models/embedded/image.js';
 
-// init multer for fup
+const unableToFindStoreErr = function (id) {
+    return new HTTPErrorBuilder()
+        .message(`Store not found with id of ${id}`)
+        .code(404);
+};
 
 // @desc        Get Stores
 // @route       GET /api/v1/stores
@@ -15,9 +20,7 @@ export const getStores = async (req, res, next) => {
             data: stores
         });
     } catch (err) {
-        res.status(400).json({
-            success: false
-        });
+        next(err);
     }
 };
 
@@ -26,23 +29,18 @@ export const getStores = async (req, res, next) => {
 // @access      Public
 export const getStore = async (req, res, next) => {
     const { id } = req.params;
-
     try {
         const store = await Store.findById(id);
         if (!store) {
-            res.status(404).json({
-                success: false
-            });
-        } else {
-            res.status(200).json({
-                success: true,
-                data: store
-            });
+            return next(unableToFindStoreErr(id));
         }
-    } catch (err) {
-        res.status(400).json({
-            success: false
+
+        res.status(200).json({
+            success: true,
+            data: store
         });
+    } catch (err) {
+        next(err);
     }
 };
 
@@ -53,16 +51,12 @@ export const createStore = async (req, res, next) => {
     try {
         req.body['admins'] = [req.body.owner];
         const store = await Store.create(req.body);
-        console.log(Buffer.from(store.image.data));
         res.status(201).json({
             success: true,
             data: store
         });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            msg: error.message
-        });
+    } catch (err) {
+        next(err);
     }
 };
 
@@ -78,10 +72,7 @@ export const updateStore = async (req, res, next) => {
         });
 
         if (!store) {
-            res.status(404).json({
-                success: false,
-                msg: 'Not Found'
-            });
+            return next(unableToFindStoreErr(id));
         } else {
             res.status(200).json({
                 success: true,
@@ -89,9 +80,7 @@ export const updateStore = async (req, res, next) => {
             });
         }
     } catch (err) {
-        res.status(400).json({
-            success: false
-        });
+        next(err);
     }
 };
 
@@ -104,9 +93,7 @@ export const deleteStore = async (req, res, next) => {
         const store = Store.findByIdAndDelete(id);
 
         if (!store) {
-            res.status(404).json({
-                success: false
-            });
+            return next(unableToFindStoreErr(id));
         } else {
             res.status(200).json({
                 success: true,
@@ -124,10 +111,9 @@ export const deleteStore = async (req, res, next) => {
 // @route       PUT /api/v1/stores/uploads/:id
 // @access      Private
 export const updateImageStore = async (req, res, next) => {
-    console.log(req);
     const { id } = req.params;
     const { buffer, mimetype } = req.file;
-
+    const httpErr = new HTTPErrorBuilder();
     const image = {
         data: new Buffer.from(buffer),
         contentType: mimetype
@@ -136,32 +122,30 @@ export const updateImageStore = async (req, res, next) => {
     const savedImage = await Image.create(image);
 
     if (!savedImage) {
-        res.status(400).json({
-            success: false,
-            msg: 'Unable to upload image'
-        });
+        return next(httpErr.message('Unable to upload image').code(400));
     }
 
-    const store = await Store.findByIdAndUpdate(
-        id,
-        {
-            image: savedImage
-        },
-        {
-            new: true,
-            runValidators: true
-        }
-    );
+    try {
+        const store = await Store.findByIdAndUpdate(
+            id,
+            {
+                image: savedImage
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
 
-    if (!store) {
-        res.status(404).json({
-            success: false,
-            msg: 'Unable to upload image'
-        });
-    } else {
-        res.status(200).json({
-            success: true,
-            data: store
-        });
+        if (!store) {
+            return next(unableToFindStoreErr(id));
+        } else {
+            res.status(200).json({
+                success: true,
+                data: store
+            });
+        }
+    } catch (err) {
+        next(err);
     }
 };
