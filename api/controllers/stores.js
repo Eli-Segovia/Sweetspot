@@ -71,7 +71,7 @@ export const updateStore = asyncHandler(async (req, res, next) => {
 // @access      Private
 export const deleteStore = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    const store = Store.findByIdAndDelete(id);
+    const store = await Store.findByIdAndDelete(id);
 
     if (!store) {
         return next(unableToFindStoreErr(id));
