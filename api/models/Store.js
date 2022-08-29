@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { imageSchema, locationSchema } from './embedded/index.js';
 import slugify from 'slugify';
+import geocoder from '../utils/geocoder.js';
 
 const { Schema, model } = mongoose;
 
@@ -94,15 +95,19 @@ StoreSchema.pre('save', function (next) {
     if (!this.alternateName) {
         this.alternateName = this.owner;
     }
-
     this.fullName = `${this.name}-${this.owner}`;
 
     // create slug
     this.slug = slugify(this.fullName, { lower: true });
 
-    console.log('Slugify ran', this.name);
-
     next();
 });
+
+// Geocode and create location
+/* TODO: finish implementing this properly
+// StoreSchema.pre('save', async function (next) {
+//     const loc = await geocoder.geocode(this.address);
+// });
+*/
 
 export default model('Store', StoreSchema);
