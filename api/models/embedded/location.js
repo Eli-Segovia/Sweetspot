@@ -17,8 +17,14 @@ const locationSchema = new Schema({
     formattedAddress: String,
     address: Number,
     street: String,
-    state: String,
-    city: String,
+    state: {
+        type: String,
+        required: true
+    },
+    city: {
+        type: String,
+        required: true
+    },
     zip: Number
 });
 

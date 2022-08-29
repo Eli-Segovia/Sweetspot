@@ -97,15 +97,16 @@ export const updateImageStore = asyncHandler(async (req, res, next) => {
 
     let store = await Store.findById(id);
 
+    if (!store) {
+        console.log('here. bad..');
+        return next(unableToFindStoreErr(id));
+    }
+
     const store_image_hash = hash(store.image.data);
     const image_hash = hash(image.data);
 
     if (store_image_hash === image_hash) {
         return next(httpErr.message('Duplicate image uploaded').code(400));
-    }
-
-    if (!store) {
-        return next(unableToFindStoreErr(id));
     }
 
     store = await Store.findByIdAndUpdate(

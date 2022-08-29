@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import defaults from './defaults.js';
 const { defaultImage } = defaults;
-const { Schema, model } = mongoose;
+const { Schema } = mongoose;
 
 const _options = {
     timestamps: true
@@ -20,6 +20,4 @@ const imageSchema = Schema(
     },
     _options
 );
-
-export const Image = model('Image', imageSchema);
 export default imageSchema;

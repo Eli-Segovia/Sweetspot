@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { imageSchema, locationSchema } from './embedded/index.js';
+import slugify from 'slugify';
 
 const { Schema, model } = mongoose;
 
@@ -9,6 +10,16 @@ const StoreSchema = new Schema({
         required: [true, 'Please add a name'],
         trim: true,
         maxlength: [50, 'Name cannot be more than 50 characters']
+    },
+
+    alternateName: {
+        type: String,
+        required: false
+    },
+
+    fullName: {
+        type: String,
+        unique: true
     },
 
     owner: {
@@ -58,11 +69,6 @@ const StoreSchema = new Schema({
         maxlength: [500, 'Description cannot be longer than 500 characters']
     },
 
-    alternateAddress: {
-        type: String,
-        required: false
-    },
-
     location: {
         type: locationSchema,
         required: false
@@ -81,6 +87,22 @@ const StoreSchema = new Schema({
         max: [10, 'Rating must be no more than 10'],
         required: false
     }
+});
+
+// Hooks/Middleware
+StoreSchema.pre('save', function (next) {
+    if (!this.alternateName) {
+        this.alternateName = this.owner;
+    }
+
+    this.fullName = `${this.name}-${this.owner}`;
+
+    // create slug
+    this.slug = slugify(this.fullName, { lower: true });
+
+    console.log('Slugify ran', this.name);
+
+    next();
 });
 
 export default model('Store', StoreSchema);
