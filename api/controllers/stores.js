@@ -71,7 +71,6 @@ export const updateStore = asyncHandler(async (req, res, next) => {
 // @access      Private
 export const deleteStore = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-
     const store = Store.findByIdAndDelete(id);
 
     if (!store) {
@@ -98,7 +97,12 @@ export const updateImageStore = asyncHandler(async (req, res, next) => {
 
     let store = await Store.findById(id);
 
-    console.log(store.image);
+    const store_image_hash = hash(store.image.data);
+    const image_hash = hash(image.data);
+
+    if (store_image_hash === image_hash) {
+        return next(httpErr.message('Duplicate image uploaded').code(400));
+    }
 
     if (!store) {
         return next(unableToFindStoreErr(id));
