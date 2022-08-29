@@ -14,6 +14,18 @@ const errorHandler = (err, req, res, next) => {
                 .message(`Store not found with id of ${err.value}`)
                 .code(404);
             break;
+        case 'MongoError':
+            if (err.code === 11000)
+                error = httpErrBldr
+                    .message('Duplicate field values are not allowed')
+                    .code(400);
+            break;
+        case 'ValidationError':
+            const message = Object.values(err.errors).map(
+                (errVal) => errVal.message
+            );
+            error = httpErrBldr.message(message).code(400);
+            break;
     }
 
     res.status(error.statusCode).json({
