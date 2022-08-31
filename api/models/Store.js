@@ -1,8 +1,102 @@
 import mongoose from 'mongoose';
-import { imageSchema, locationSchema } from './embedded/index.js';
 import slugify from 'slugify';
+import countrycitystate from 'countrycitystatejson';
+import { imageSchema } from './embedded/index.js';
+import geocoder from '../utils/geocoder.js';
+import { states, findSortedCities } from '../utils/locations.js';
 
 const { Schema, model } = mongoose;
+
+/* ------ start Children Schemas ----- */
+const locationSchema = new Schema({
+    location: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: [
+                function () {
+                    return this.location.coordinates ? true : false;
+                },
+                'Type must be specified to use location'
+            ]
+        },
+        coordinates: {
+            type: [Number],
+            required: [
+                function () {
+                    return this.location.type ? true : false;
+                },
+                'Coordinates must be specified to use location'
+            ],
+            index: '2dsphere'
+        }
+    },
+    formattedAddress: String,
+    address: {
+        type: Number,
+        required: [
+            function () {
+                return this.street ? true : false;
+            },
+            'Address is required if street is provided'
+        ]
+    },
+    street: {
+        type: String,
+        required: [
+            function () {
+                return this.address ? true : false;
+            },
+            'Street is required if address is provided'
+        ]
+    },
+    state: {
+        type: String,
+        required: true,
+        enum: states
+    },
+    city: {
+        type: String,
+        required: true,
+        validate: {
+            validator: async function (city) {
+                const cities = await countrycitystate.getCities(
+                    'US',
+                    this.state
+                );
+                return findSortedCities(cities, city) >= 0;
+            }
+        }
+    },
+    zip: Number
+});
+
+locationSchema.pre('save', async function (next) {
+    // Address that geocoder will encode
+    const tempAddress = `${this.address || ''} ${this.street || ''} ${
+        this.city
+    }, ${this.state} ${this.zip || ''}`.trim();
+
+    // Get geocode data
+    const loc = await geocoder.geocode(tempAddress);
+
+    // Set formatted Address
+    this.formattedAddress = loc[0].formattedAddress;
+
+    // Set Zip Code
+    this.zip = parseInt(loc[0].zipcode);
+
+    // Set location
+    this.location = {
+        type: 'Point',
+        coordinates: [loc[0].longitude, loc[0].latitude]
+    };
+
+    next();
+});
+/* --------- End Children Schemas ------------ */
+
+const Image = model('Image', imageSchema);
 
 const StoreSchema = new Schema({
     name: {
@@ -59,7 +153,7 @@ const StoreSchema = new Schema({
     ],
 
     image: {
-        type: imageSchema,
+        type: Image.schema,
         default: () => ({})
     },
 
@@ -94,15 +188,17 @@ StoreSchema.pre('save', function (next) {
     if (!this.alternateName) {
         this.alternateName = this.owner;
     }
-
     this.fullName = `${this.name}-${this.owner}`;
 
     // create slug
     this.slug = slugify(this.fullName, { lower: true });
 
-    console.log('Slugify ran', this.name);
-
     next();
 });
+
+// Geocode and create location
+// StoreSchema.pre('save', async function (next) {
+//     const loc = await geocoder.geocode(this.address);
+// });
 
 export default model('Store', StoreSchema);

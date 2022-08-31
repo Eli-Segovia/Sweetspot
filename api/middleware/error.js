@@ -28,7 +28,7 @@ const errorHandler = (err, req, res, next) => {
             break;
     }
 
-    res.status(error.statusCode).json({
+    res.status(error.statusCode || 500).json({
         success: false,
         error: error.message
     });
