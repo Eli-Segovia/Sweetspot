@@ -38,7 +38,20 @@ export const getStore = asyncHandler(async (req, res, next) => {
 // @access      Private
 export const createStore = asyncHandler(async (req, res, next) => {
     req.body['admins'] = [req.body.owner];
-    const store = await Store.create(req.body);
+
+    if (req.body.state) {
+        var locationFields = {
+            address: req.body.address,
+            street: req.body.street,
+            state: req.body.state,
+            city: req.body.city
+        };
+    }
+
+    const store = new Store(req.body);
+    if (locationFields) store.location = locationFields;
+    await store.save();
+
     res.status(201).json({
         success: true,
         data: store

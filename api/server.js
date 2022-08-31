@@ -1,14 +1,23 @@
 import express from 'express';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import morgan from 'morgan';
 import colors from 'colors';
 import errorHandler from './middleware/error.js';
-
 import routerMounter from './utils/routerMounter.js';
 import connectDB from './config/db.js';
 
+/* ---------START Dir stuff ----------- */
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// ES6 Module import way of getting access to __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+/* --------- END   Dir stuff ----------- */
+
 // Load env variables
-dotenv.config({ path: './config/config.env' });
+dotenv.config({ path: `${__dirname}/config/config.env` });
 
 // Connect to Mongo
 connectDB();
