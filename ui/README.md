@@ -1,3 +1,7 @@
+# Sweetspot
+
+Sweetspot is a place where sweet hobbyists can make and sell their sweets online. Users can register to sell their sweets or to simply buy sweets from local small sweet hobbyists or small businesses! This is meant as a place for individual sellers and not big chain sellers.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
