@@ -68,7 +68,7 @@ const locationSchema = new Schema({
             }
         }
     },
-    zip: Number
+    zip: String
 });
 
 locationSchema.pre('save', async function (next) {
@@ -84,7 +84,7 @@ locationSchema.pre('save', async function (next) {
     this.formattedAddress = loc[0].formattedAddress;
 
     // Set Zip Code
-    this.zip = parseInt(loc[0].zipcode);
+    this.zip = loc[0].zipcode;
 
     // Set location
     this.location = {

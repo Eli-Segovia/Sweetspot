@@ -3,12 +3,38 @@ import { HTTPErrorBuilder } from '../utils/HTTPError.js';
 import { unableToFindStoreErr } from '../utils/errors.js';
 import hash from 'object-hash';
 import asyncHandler from '../middleware/async.js';
+import geocoder from '../utils/geocoder.js';
 
 // @desc        Get Stores
-// @route       GET /api/v1/stores
+// @route       GET /api/v1/stores?zipcode=xxxxx&distance=xxxx(miles)
 // @access      Public
 export const getStores = asyncHandler(async (req, res, next) => {
-    const stores = await Store.find();
+    let queries = {};
+
+    // get queries from URL
+    ['zipcode', 'distance'].forEach((key) => {
+        if (req.query[key]) {
+            queries[key] = req.query[key];
+        }
+    });
+
+    const queryKeys = Object.keys(queries);
+
+    if (Object.keys(req.query).length > queryKeys.length) {
+        return next(
+            new HTTPErrorBuilder()
+                .message('Provided string query is invalid')
+                .code(400)
+        );
+    }
+
+    let stores = {};
+
+    if (queryKeys[0] == 'zipcode' && queryKeys[1] == 'distance') {
+        stores = await getStoresInRadius(queries.zipcode, queries.distance);
+    } else {
+        stores = await Store.find();
+    }
 
     res.status(200).json({
         success: true,
@@ -133,3 +159,19 @@ export const updateImageStore = asyncHandler(async (req, res, next) => {
         data: store
     });
 });
+
+/* --------- Not Exported ------------- */
+async function getStoresInRadius(zipcode, distance) {
+    // get lat/lng
+    const loc = await geocoder.geocode(zipcode);
+    const { latitude: lat, longitude: lng } = loc[0];
+
+    const radius = distance / 3963;
+
+    const stores = await Store.find({
+        'location.location': {
+            $geoWithin: { $centerSphere: [[lng, lat], radius] }
+        }
+    });
+    return stores;
+}
