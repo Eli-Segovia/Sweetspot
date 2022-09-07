@@ -171,7 +171,7 @@ const StoreSchema = new Schema({
     products: [
         {
             type: Schema.Types.ObjectId,
-            refs: 'Product',
+            refs: 'Products',
             required: false
         }
     ],

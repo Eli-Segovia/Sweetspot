@@ -10,12 +10,13 @@ const _options = {
 const imageSchema = Schema(
     {
         data: {
-            type: Buffer,
-            default: Buffer.from(defaultImage, 'base64')
+            type: mongoose.Mixed,
+            default:
+                'https://thumbs.dreamstime.com/b/default-avatar-profile-image-vector-social-media-user-icon-potrait-182347582.jpg'
         },
         contentType: {
             type: String,
-            default: 'image/png'
+            default: 'url'
         }
     },
     _options
