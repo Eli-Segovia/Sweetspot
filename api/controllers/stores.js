@@ -1,6 +1,9 @@
 import Store from '../models/Store.js';
 import { HTTPErrorBuilder } from '../utils/HTTPError.js';
-import { unableToFindStoreErr } from '../utils/errors.js';
+import {
+    successfulRequest,
+    unableToFindResourceErr
+} from '../utils/HTTPResponse.js';
 import hash from 'object-hash';
 import asyncHandler from '../middleware/async.js';
 import geocoder from '../utils/geocoder.js';
@@ -36,10 +39,7 @@ export const getStores = asyncHandler(async (req, res, next) => {
         stores = await Store.find();
     }
 
-    res.status(200).json({
-        success: true,
-        data: stores
-    });
+    successfulRequest(stores, res);
 });
 
 // @desc        Get Store
@@ -50,13 +50,10 @@ export const getStore = asyncHandler(async (req, res, next) => {
 
     const store = await Store.findById(id);
     if (!store) {
-        return next(unableToFindStoreErr(id));
+        return next(unableToFindResourceErr(id, 'Store'));
     }
 
-    res.status(200).json({
-        success: true,
-        data: store
-    });
+    successfulRequest(store, res);
 });
 
 // @desc        Create Store
@@ -78,10 +75,7 @@ export const createStore = asyncHandler(async (req, res, next) => {
     if (locationFields) store.location = locationFields;
     await store.save();
 
-    res.status(201).json({
-        success: true,
-        data: store
-    });
+    successfulRequest(store, res, 201);
 });
 
 // @desc        Update Store
@@ -96,13 +90,10 @@ export const updateStore = asyncHandler(async (req, res, next) => {
     });
 
     if (!store) {
-        return next(unableToFindStoreErr(id));
+        return next(unableToFindResourceErr(id, 'Store'));
     }
 
-    res.status(200).json({
-        success: true,
-        data: store
-    });
+    successfulRequest(store, res);
 });
 
 // @desc        Delete Store
@@ -113,13 +104,9 @@ export const deleteStore = asyncHandler(async (req, res, next) => {
     const store = await Store.findByIdAndDelete(id);
 
     if (!store) {
-        return next(unableToFindStoreErr(id));
+        return next(unableToFindResourceErr(id, 'Store'));
     }
-
-    res.status(200).json({
-        success: true,
-        data: store
-    });
+    successfulRequest(store, res);
 });
 
 // @desc        Update Store
@@ -137,8 +124,7 @@ export const updateImageStore = asyncHandler(async (req, res, next) => {
     let store = await Store.findById(id);
 
     if (!store) {
-        console.log('here. bad..');
-        return next(unableToFindStoreErr(id));
+        return next(unableToFindStoreErr(id, 'Store'));
     }
 
     const store_image_hash = hash(store.image.data);
@@ -153,11 +139,7 @@ export const updateImageStore = asyncHandler(async (req, res, next) => {
         { image },
         { new: true, runValidators: true }
     );
-
-    res.status(200).json({
-        success: true,
-        data: store
-    });
+    successfulRequest(store, res);
 });
 
 /* --------- Not Exported ------------- */
